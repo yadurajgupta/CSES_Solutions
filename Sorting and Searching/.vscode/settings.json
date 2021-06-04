@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "iostream": "cpp",
-        "ostream": "cpp",
-        "utility": "cpp",
-        "xiosbase": "cpp"
-    },
-    "cph.general.defaultLanguageTemplateFileLocation": "C:\\Users\\yadur\\Desktop\\CC\\cpp_template.cpp"
-}
