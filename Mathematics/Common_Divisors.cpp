@@ -1,5 +1,3 @@
-// replace slashes then double qutotes then stringify
-
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
@@ -71,62 +69,30 @@ template <typename t1, typename t2> void _debug_p(const pair<t1, t2> &p);
 // clang-format on
 /* TEMPLATE END */
 #pragma endregion
-int N, x, y, Q, max_distinct;
-const int NMAX = 2e5 + 5;
-array<int, NMAX> arr;
-array<int, NMAX> freq;
-void add_num(int &distinct_vals, int to_add)
-{
-    freq[to_add]++;
-    if (freq[to_add] == 1)
-        distinct_vals++;
-}
-
-void rem_num(int &distinct_vals, int to_rem)
-{
-    freq[to_rem]--;
-    if (freq[to_rem] == 0)
-        distinct_vals--;
-}
+int N, x, y, Q;
+const int NMAX = 2e6 + 5;
+array<int, NMAX> cnt;
 void solve()
 {
-    cin >> N >> max_distinct;
+    cin >> N;
     forab(i, 1, N + 1)
     {
-        cin >> arr[i];
+        cin >> x;
+        cnt[x]++;
     }
+    forabd(i, NMAX - 1, 1)
     {
-        map<int, int> mp;
-        forab(i, 1, N + 1)
+        int div = 0;
+        forabi(j, i, NMAX, i)
         {
-            if (mp.count(arr[i]) == 0)
-                mp[arr[i]] = mp.size() + 1;
-            arr[i] = mp[arr[i]];
-        }
-    }
-    int distinct_vals = 0;
-    int i, j;
-    i = j = 1;
-    int ans = 0;
-    while (i <= N)
-    {
-        while (j <= N && distinct_vals <= max_distinct)
-        {
-            add_num(distinct_vals, arr[j]);
-            if (distinct_vals <= max_distinct)
+            div += cnt[j];
+            if (div > 1)
             {
-                j++;
-            }
-            else
-            {
-                rem_num(distinct_vals, arr[j]);
-                break;
+                cout << i << endl;
+                return;
             }
         }
-        ans += (j - i);
-        rem_num(distinct_vals, arr[i++]);
     }
-    cout << ans << endl;
 }
 int32_t main()
 {
@@ -138,7 +104,6 @@ int32_t main()
 #endif
 #ifdef _DEBUG_CODE
     cout << "DEBUGGING ON" << endl;
-    cout.flush();
     freopen("C:\\Users\\yadur\\Desktop\\CC\\IN.txt", "r", stdin);
     freopen("C:\\Users\\yadur\\Desktop\\CC\\OUT.txt", "w", stdout);
 #endif
