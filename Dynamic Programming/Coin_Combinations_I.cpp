@@ -6,11 +6,11 @@
 #include <iostream>
 using namespace std;
 
-// #define _DEBUG_CODE 1
+// // #define _DEBUG_CODE 1
 // #define ONLINE_JUDGE 1
 #pragma region
 // clang-format off
-// #define int long long
+#define int long long
 #define ordered_set(type) __gnu_pbds::tree<type, __gnu_pbds::null_type, less<type>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>
 #define forab(ii, aa, bb) for (int ii = aa; ii < bb; ii++)
 #define forabd(ii, aa, bb) for (int ii = aa; ii >= bb; ii--)
@@ -23,6 +23,7 @@ using namespace std;
 #define mkp make_pair
 #define mka(type, SZ) array<type, SZ>
 #define printn(vv, NN) forab(ii, 0, NN) _debug_p(vv[ii]), cout << ' '; PL;
+
 #ifndef ONLINE_JUDGE
     #define PNAV(x) cout << #x << ' '; _debug_p(x); cout << ' ';
     #define debug(x1) PNAV(x1) cout << endl;
@@ -31,6 +32,10 @@ using namespace std;
     #define debug4(x1, x2, x3, x4) PNAV(x1); debug3(x2, x3, x4);
     #define debug5(x1, x2, x3, x4, x5) PNAV(x1); debug4(x2, x3, x4, x5);
     #define debug6(x1, x2, x3, x4, x5, x6) PNAV(x1); debug5(x2, x3, x4, x5, x6);
+    #define debug7(x1, x2, x3, x4, x5, x6, x7) PNAV(x1); debug6(x2, x3, x4, x5, x6, x7);
+    #define debug8(x1, x2, x3, x4, x5, x6, x7, x8) PNAV(x1); debug7(x2, x3, x4, x5, x6, x7, x8);
+    #define debug9(x1, x2, x3, x4, x5, x6, x7, x8, x9) PNAV(x1); debug8(x2, x3, x4, x5, x6, x7, x8, x9);
+    #define debug10(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10) PNAV(x1); debug9(x2, x3, x4, x5, x6, x7, x8, x9, x10);
     #define debugab(x1, s, e) cout << #x1 << '[' << min((int)s, (int)e) << ':' << max((int)s, (int)e) << ']' << ' '; _debug_p_vector_typeab(x1, min((int)s, (int)e), max((int)s, (int)e) + 1); cout<<endl;
     void _debug_p(int T);
     void _debug_p(int32_t T);
@@ -59,6 +64,7 @@ using namespace std;
     template <typename T> void _debug_p_map_type(const T &t);
     template <typename t1, typename t2> void _debug_p(const pair<t1, t2> &p);
 #endif
+
 #ifdef ONLINE_JUDGE
     #define PNAV(x)
     #define debug(x1)
@@ -67,40 +73,41 @@ using namespace std;
     #define debug4(x1, x2, x3, x4)
     #define debug5(x1, x2, x3, x4, x5)
     #define debug6(x1, x2, x3, x4, x5, x6)
+    #define debug7(x1, x2, x3, x4, x5, x6, x7)
+    #define debug8(x1, x2, x3, x4, x5, x6, x7, x8)
+    #define debug9(x1, x2, x3, x4, x5, x6, x7, x8, x9)
+    #define debug10(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10)
     #define debugab(x1,s,e)
     #define endl '\n'
-
 #endif
-
 // clang-format on
 /* TEMPLATE END */
 #pragma endregion
-int N, x, y, Q, sum;
+int N, x, y, Q, target_sum;
 const int NMAX = 1e6 + 5;
-array<int, NMAX> coins;
-array<int, NMAX> number_of_ways_to_make_sum;
-int32_t MOD = 1e9 + 7;
-int modAdd(int a, int b) { return ((a % MOD + b % MOD) % MOD + MOD) % MOD; }
-int modMult(int a, int b) { return (((a % MOD) * (b % MOD)) % MOD + MOD) % MOD; }
+int coins[NMAX];
+int number_of_ways[NMAX];
+const int MOD = 1e9 + 7;
+inline int modAdd(int a, int b) { return ((a % MOD + b % MOD) % MOD + MOD) % MOD; }
+inline int modMult(int a, int b) { return (((a % MOD) * (b % MOD)) % MOD + MOD) % MOD; }
 void solve()
 {
-    cin >> N >> sum;
-    forab(i, 1, N + 1)
-    {
-        cin >> coins[i];
-    }
-    sort(coins.begin() + 1, coins.begin() + N + 1);
-    number_of_ways_to_make_sum[0] = 1;
-    forab(curr_sum, 1, sum + 1)
+    cin >> N >> target_sum;
+    forab(i, 1, N + 1) { cin >> coins[i]; }
+    sort(coins + 1, coins + N + 1);
+    number_of_ways[0] = 1;
+    forab(curr_sum, 1, target_sum + 1)
     {
         forab(coin_idx, 1, N + 1)
         {
             if (curr_sum < coins[coin_idx]) break;
-            number_of_ways_to_make_sum[curr_sum] += number_of_ways_to_make_sum[curr_sum - coins[coin_idx]];
-            number_of_ways_to_make_sum[curr_sum] %= MOD;
+            if (!number_of_ways[curr_sum - coins[coin_idx]]) continue;
+            number_of_ways[curr_sum] = (number_of_ways[curr_sum] +
+                                        number_of_ways[curr_sum - coins[coin_idx]]) %
+                                       MOD;
         }
     }
-    cout << number_of_ways_to_make_sum[sum] << endl;
+    cout << number_of_ways[target_sum] << endl;
 }
 int32_t main()
 {
@@ -124,79 +131,79 @@ int32_t main()
 }
 #pragma region
 // clang-format off
-    #ifndef ONLINE_JUDGE
-    void _debug_p(int T) { cout << T; }
-    void _debug_p(int32_t T) { cout << T; }
-    void _debug_p(unsigned int T) { cout << T; }
-    void _debug_p(unsigned T) { cout << T; }
-    void _debug_p(double T) { cout << T << 'd'; }
-    void _debug_p(string T) { cout << '"' << T << '"'; }
-    void _debug_p(const char T[]) { cout << '"' << T << '"'; }
-    void _debug_p(char T) { cout << '\'' << T << '\''; }
-    void _debug_p(bool T) { cout << (T ? '1' : '0') << 'b'; }
-    template <typename T> void _debug_p(const vector<T> &vec) { _debug_p_vector_type(vec); }
-    template <typename T> void _debug_p(const list<T> &vec) { _debug_p_vector_type(vec); }
-    template <typename T,size_t sz> void _debug_p(const array<T,sz> &vec) { _debug_p_vector_type(vec); }
-    template <typename T> void _debug_p(const set<T> &vec) { _debug_p_vector_type(vec); }
-    template <typename T> void _debug_p(const unordered_set<T> &vec) { _debug_p_vector_type(vec); }
-    template <typename T> void _debug_p(const multiset<T> &vec) { _debug_p_vector_type(vec); }
-    template <typename T> void _debug_p(const unordered_multiset<T> &vec) { _debug_p_vector_type(vec); }
-    template <typename t1, typename t2> void _debug_p(const map<t1, t2> &mp) { _debug_p_map_type(mp); }
-    template <typename t1, typename t2> void _debug_p(const unordered_map<t1, t2> &mp) { _debug_p_map_type(mp); }
-    template <typename t1, typename t2> void _debug_p(const multimap<t1, t2> &mp) { _debug_p_map_type(mp); }
-    template <typename t1, typename t2> void _debug_p(const unordered_multimap<t1, t2> &mp) { _debug_p_map_type(mp); }
-    template <class... T> void _debug_p(const tuple<T...> &_tup) { _debug_p_tup(_tup, make_index_sequence<sizeof...(T)>()); }
-    template <class TupType, size_t... I> void _debug_p_tup(const TupType &_tup, index_sequence<I...>) { 
-        cout << '(';
-        (..., (cout << (I == 0 ? "" : ", "), _debug_p(get<I>(_tup))));
-        cout << ')';
+#ifndef ONLINE_JUDGE
+void _debug_p(int T) { cout << T; }
+void _debug_p(int32_t T) { cout << T; }
+void _debug_p(unsigned int T) { cout << T; }
+void _debug_p(unsigned T) { cout << T; }
+void _debug_p(double T) { cout << T << 'd'; }
+void _debug_p(string T) { cout << '"' << T << '"'; }
+void _debug_p(const char T[]) { cout << '"' << T << '"'; }
+void _debug_p(char T) { cout << '\'' << T << '\''; }
+void _debug_p(bool T) { cout << (T ? '1' : '0') << 'b'; }
+template <typename T> void _debug_p(const vector<T> &vec) { _debug_p_vector_type(vec); }
+template <typename T> void _debug_p(const list<T> &vec) { _debug_p_vector_type(vec); }
+template <typename T,size_t sz> void _debug_p(const array<T,sz> &vec) { _debug_p_vector_type(vec); }
+template <typename T> void _debug_p(const set<T> &vec) { _debug_p_vector_type(vec); }
+template <typename T> void _debug_p(const unordered_set<T> &vec) { _debug_p_vector_type(vec); }
+template <typename T> void _debug_p(const multiset<T> &vec) { _debug_p_vector_type(vec); }
+template <typename T> void _debug_p(const unordered_multiset<T> &vec) { _debug_p_vector_type(vec); }
+template <typename t1, typename t2> void _debug_p(const map<t1, t2> &mp) { _debug_p_map_type(mp); }
+template <typename t1, typename t2> void _debug_p(const unordered_map<t1, t2> &mp) { _debug_p_map_type(mp); }
+template <typename t1, typename t2> void _debug_p(const multimap<t1, t2> &mp) { _debug_p_map_type(mp); }
+template <typename t1, typename t2> void _debug_p(const unordered_multimap<t1, t2> &mp) { _debug_p_map_type(mp); }
+template <class... T> void _debug_p(const tuple<T...> &_tup) { _debug_p_tup(_tup, make_index_sequence<sizeof...(T)>()); }
+template <class TupType, size_t... I> void _debug_p_tup(const TupType &_tup, index_sequence<I...>) {
+    cout << '(';
+    (..., (cout << (I == 0 ? "" : ", "), _debug_p(get<I>(_tup))));
+    cout << ')';
+}
+template <typename T> void _debug_p_vector_type(const T &t) {
+    cout << '[';
+    bool first = true;
+    for (auto it : t)
+    {
+        if (!first)
+            cout << ',' << ' ';
+        _debug_p(it);
+        first = false;
     }
-    template <typename T> void _debug_p_vector_type(const T &t) { 
-        cout << '[';
-        bool first = true;
-        for (auto it : t)
-        {
-            if (!first)
-                cout << ',' << ' ';
-            _debug_p(it);
-            first = false;
-        }
-        cout << ']';
+    cout << ']';
+}
+template <typename T> void _debug_p_vector_typeab(const T &t,int s,int e) {
+    cout << '[';
+    bool first = true;
+    forab (i,s,e)
+    {
+        if (!first)
+            cout << ',' << ' ';
+        _debug_p(t[i]);
+        first = false;
     }
-    template <typename T> void _debug_p_vector_typeab(const T &t,int s,int e) { 
-        cout << '[';
-        bool first = true;
-        forab (i,s,e)
-        {
-            if (!first)
-                cout << ',' << ' ';
-            _debug_p(t[i]);
-            first = false;
-        }
-        cout << ']';
+    cout << ']';
+}
+template <typename T> void _debug_p_map_type(const T &t) {
+    cout << '[';
+    bool first = true;
+    for (const auto &[key, val] : t)
+    {
+        if (!first)
+            cout << ',' << ' ';
+        cout << '{';
+        _debug_p(key);
+        cout << ':';
+        _debug_p(val);
+        cout << '}';
+        first = false;
     }
-    template <typename T> void _debug_p_map_type(const T &t) { 
-        cout << '[';
-        bool first = true;
-        for (const auto &[key, val] : t)
-        {
-            if (!first)
-                cout << ',' << ' ';
-            cout << '{';
-            _debug_p(key);
-            cout << ':';
-            _debug_p(val);
-            cout << '}';
-            first = false;
-        }
-        cout << ']';
-    }
-    template <typename t1, typename t2> void _debug_p(const pair<t1, t2> &p) { 
-        cout << '(';
-        _debug_p(p.first);
-        cout << ',' << ' ';
-        _debug_p(p.second);
-        cout << ')';
-    }
-    #pragma endregion
+    cout << ']';
+}
+template <typename t1, typename t2> void _debug_p(const pair<t1, t2> &p) {
+    cout << '(';
+    _debug_p(p.first);
+    cout << ',' << ' ';
+    _debug_p(p.second);
+    cout << ')';
+}
 #endif
+#pragma endregion
