@@ -122,24 +122,24 @@ void _debug_p(unordered_multimap<t1, t2> mp);
 /* TEMPLATE END */
 int N, x, y;
 const int NMAX = 1e6 + 5;
-array<int, NMAX> arr;
+array<int, NMAX> is_rpime;
 vector<int> primes;
 void seive()
 {
-    arr.fill(0);
+    is_rpime.fill(0);
     forab(i, 1, NMAX)
     {
         forab(j, 1, NMAX)
         {
             if (i * j >= NMAX)
                 break;
-            arr[i * j]++;
+            is_rpime[i * j]++;
         }
     }
 }
 int num_of_divisors(int num)
 {
-    if (arr[num])
+    if (is_rpime[num])
         return 2;
     int index = 0;
     int ans = 1;
@@ -164,7 +164,7 @@ int num_of_divisors(int num)
 void solve()
 {
     cin >> N;
-    cout << arr[N] << endl;
+    cout << is_rpime[N] << endl;
 }
 int32_t main()
 {
