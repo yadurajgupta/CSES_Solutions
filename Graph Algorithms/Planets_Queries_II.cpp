@@ -85,11 +85,10 @@ using namespace std;
 #pragma endregion
 int N, x, y, Q;
 const int NMAX = 2e5 + 5;
-const int LGMAX = 32;
+const int LGMAX = 20;
 array<array<int, LGMAX>, NMAX> rev_dp;
 array<int, NMAX> rev_depth;
 array<vector<int>, NMAX> rev_adj;
-array<vector<int>, NMAX> bi_adj;
 array<int, NMAX> arr;
 array<int, NMAX> cycles_ids;
 array<int, NMAX> cycles_ids_pos;
@@ -225,6 +224,7 @@ void solve()
 
     for (auto &row : rev_dp)
         row.fill(-1);
+
     rev_depth.fill(-1);
     cycles_ids.fill(-1);
     cycles_ids_pos.fill(-1);
@@ -239,6 +239,7 @@ void solve()
         cin >> arr[i];
         rev_adj[arr[i]].push_back(i);
     }
+
     vis.fill(false);
     curr_vis.fill(false);
     node_to_index.fill(-1);
