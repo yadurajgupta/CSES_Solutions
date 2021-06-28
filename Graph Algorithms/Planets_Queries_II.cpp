@@ -99,11 +99,12 @@ array<int, NMAX> trees_ids_to_cycle_node;
 array<int, NMAX> tree_to_root_node;
 array<bool, NMAX> curr_vis;
 array<bool, NMAX> vis;
-array<int, NMAX> node_to_index;
 vector<int> tree_roots;
+array<int, NMAX> node_to_index;
 
 int total_number_of_cycles = 0;
 int total_number_of_trees = 0;
+
 void find_cycle(int node, int par, vector<int> &path)
 {
     int next = arr[node];
@@ -166,7 +167,7 @@ void find_tree(int node, int par, vector<int> &path)
     else //continue dfs
     {
         path.push_back(next);
-        find_tree(next, next, path);
+        find_tree(next, node, path);
         path.pop_back();
     }
 }
@@ -174,7 +175,6 @@ void set_tree_depths(int node, int par, int depth = 0)
 {
     rev_depth[node] = depth;
     rev_dp[node][0] = par;
-    // debug2(node, par);
     for (int next : rev_adj[node])
     {
         if (trees_ids[next] != -1 && next != par)
@@ -221,34 +221,17 @@ int get_tree_dist(int x, int y)
 void solve()
 {
     cin >> N >> Q;
-
-    for (auto &row : rev_dp)
-        row.fill(-1);
-
-    rev_depth.fill(-1);
-    cycles_ids.fill(-1);
-    cycles_ids_pos.fill(-1);
-    cycles_ids_size.fill(-1);
-    trees_ids.fill(-1);
-    trees_ids_to_cycle_ids.fill(-1);
-    trees_ids_to_cycle_node.fill(-1);
-    tree_to_root_node.fill(-1);
-
     forab(i, 1, N + 1)
     {
         cin >> arr[i];
         rev_adj[arr[i]].push_back(i);
     }
 
-    vis.fill(false);
-    curr_vis.fill(false);
-    node_to_index.fill(-1);
-
-    vector<int> path;
     forab(i, 1, N + 1)
     {
         if (!vis[i])
         {
+            vector<int> path;
             node_to_index[i] = path.size();
             path.push_back(i);
             vis[i] = true;
@@ -262,12 +245,11 @@ void solve()
         }
     }
 
-    vis.fill(false);
-
     forab(i, 1, N + 1)
     {
         if (trees_ids[i] == -1 && cycles_ids[i] == -1)
         {
+            vector<int> path;
             path.push_back(i);
             find_tree(i, -1, path);
             path.pop_back();
@@ -279,13 +261,13 @@ void solve()
         set_tree_depths(node, -1);
     }
 
-    forab(lg, 1, LGMAX)
+    forab(jump, 1, LGMAX)
     {
         forab(node, 1, N + 1)
         {
-            if (rev_dp[node][lg - 1] != -1)
+            if (rev_dp[node][jump - 1] != -1)
             {
-                rev_dp[node][lg] = rev_dp[rev_dp[node][lg - 1]][lg - 1];
+                rev_dp[node][jump] = rev_dp[rev_dp[node][jump - 1]][jump - 1];
             }
         }
     }
@@ -293,53 +275,34 @@ void solve()
     forab(i, 0, Q)
     {
         cin >> x >> y;
-        bool x_is_cycle = (cycles_ids[x] != -1);
-        bool y_is_cycle = (cycles_ids[y] != -1);
+        const bool &x_is_cycle = (cycles_ids[x] != -1);
+        const bool &y_is_cycle = (cycles_ids[y] != -1);
 
-        if (x_is_cycle && y_is_cycle)
+        if (x_is_cycle && y_is_cycle && cycles_ids[x] == cycles_ids[y])
         {
-            if (cycles_ids[x] != cycles_ids[y])
-            {
-                cout << -1 << endl;
-            }
-            else
-            {
-                cout << get_cycle_dist(x, y) << endl;
-            }
+            cout << get_cycle_dist(x, y) << endl;
+            continue;
         }
 
-        else if (x_is_cycle == false && y_is_cycle)
+        if (x_is_cycle == false && y_is_cycle && cycles_ids[y] == trees_ids_to_cycle_ids[x])
         {
-            if (cycles_ids[y] != trees_ids_to_cycle_ids[x])
-            {
+            int root_node_of_tree = tree_to_root_node[x];
+            int first_cycle_node = trees_ids_to_cycle_node[x];
+            int tree_dist = get_tree_dist(root_node_of_tree, x);
+            if (tree_dist == -1)
                 cout << -1 << endl;
-            }
             else
-            {
-                int root_node_of_tree = tree_to_root_node[x];
-                int first_cycle_node = trees_ids_to_cycle_node[x];
-                int x1 = get_tree_dist(root_node_of_tree, x);
-                if (x1 == -1)
-                    cout << -1 << endl;
-                else
-                    cout << x1 + 1 + get_cycle_dist(first_cycle_node, y) << endl;
-            }
+                cout << tree_dist + 1 + get_cycle_dist(first_cycle_node, y) << endl; // tree_distance + 1 to move tree to cycle
+            continue;
         }
-        else if (x_is_cycle == false && y_is_cycle == false)
+
+        if (x_is_cycle == false && y_is_cycle == false && trees_ids[x] == trees_ids[y])
         {
-            if (trees_ids[x] == trees_ids[y])
-            {
-                cout << get_tree_dist(y, x) << endl;
-            }
-            else
-            {
-                cout << -1 << endl;
-            }
+            cout << get_tree_dist(y, x) << endl;
+            continue;
         }
-        else
-        {
-            cout << -1 << endl;
-        }
+
+        cout << -1 << endl;
     }
 }
 int32_t main()
@@ -359,6 +322,17 @@ int32_t main()
     // int T;
     // cin >> T;
     // while (T--)
+    for (auto &row : rev_dp)
+        row.fill(-1);
+
+    rev_depth.fill(-1);
+    cycles_ids.fill(-1);
+    cycles_ids_pos.fill(-1);
+    cycles_ids_size.fill(-1);
+    trees_ids.fill(-1);
+    trees_ids_to_cycle_ids.fill(-1);
+    trees_ids_to_cycle_node.fill(-1);
+    tree_to_root_node.fill(-1);
     solve();
     return 0;
 }
