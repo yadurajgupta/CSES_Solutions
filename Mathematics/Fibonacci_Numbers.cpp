@@ -166,11 +166,24 @@ void show_matrix(const Matrix<_N_dim, _M_dim> &mat)
 void solve()
 {
     cin >> N;
-    if (N == 0)
+    if (N <= 1)
     {
-        cout << 0 << endl;
+        cout << N << endl;
         return;
     }
+
+    //O(1) space DP
+    // int x0 = 0;
+    // int x1 = 1;
+    // forab(i, 2, N + 1)
+    // {
+    //     int new_x0 = x1;
+    //     int new_x1 = x0 + x1;
+    //     x1 = new_x1;
+    //     x0 = new_x0;
+    // }
+    // cout << x1 << endl;
+
     array<array<int, 2>, 2> arr{{{0, 1}, {1, 1}}};
     Matrix base(arr);
     const auto &pow_N = mat_to_pow(base, N - 1);
