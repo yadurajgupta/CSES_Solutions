@@ -12,10 +12,10 @@ using namespace std;
 // clang-format off
 #define int long long
 #define ordered_set(type) __gnu_pbds::tree<type, __gnu_pbds::null_type, less<type>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>
-#define forab(ii, aa, bb) for (int ii = aa; ii < bb; ii++)
-#define forabd(ii, aa, bb) for (int ii = aa; ii >= bb; ii--)
-#define forabi(ii, aa, bb, inc) for (int ii = aa; ii < bb; ii += inc)
-#define forabdi(ii, aa, bb, inc) for (int ii = aa; ii >= bb; ii -= inc)
+#define forab(ii, aa, bb) for (unsigned int ii = aa; ii < bb; ii++)
+#define forabd(ii, aa, bb) for (unsigned int ii = aa; ii >= bb; ii--)
+#define forabi(ii, aa, bb, inc) for (unsigned int ii = aa; ii < bb; ii += inc)
+#define forabdi(ii, aa, bb, inc) for (unsigned int ii = aa; ii >= bb; ii -= inc)
 #define all(aa) aa.begin(), aa.end()
 #define rall(aa) aa.rbegin(), aa.rend()
 #define PL cout << endl
@@ -89,72 +89,88 @@ const int MOD = 1e9 + 7;
 const int MOD_INV_2 = 5e8 + 4;
 int modAdd(int a, int b) { return ((a % MOD + b % MOD) % MOD + MOD) % MOD; }
 int modMult(int a, int b) { return (((a % MOD) * (b % MOD)) % MOD + MOD) % MOD; }
+template <size_t _N_dim, size_t _M_dim>
 struct Matrix
 {
-    array<array<int, 6>, 6> data = {};
-
-    Matrix() = default;
-    Matrix(const array<array<int, 6>, 6> _data)
+    array<array<int, _N_dim>, _M_dim> data = {};
+    Matrix()
+    {
+        forab(i, 0, _N_dim) forab(j, 0, _M_dim) data[i][j] = 0;
+    }
+    Matrix(int x)
+    {
+        forab(i, 0, _N_dim) forab(j, 0, _M_dim) data[i][j] = x;
+    }
+    Matrix(const array<array<int, _N_dim>, _M_dim> _data)
     {
         data = _data;
     }
-    Matrix(int x00, int x01, int x10, int x11)
+};
+template <size_t _N_dim, size_t _mid_dim, size_t _M_dim>
+Matrix<_N_dim, _M_dim> mult_mat(const Matrix<_N_dim, _mid_dim> &a, const Matrix<_mid_dim, _M_dim> &b)
+{
+    Matrix<_N_dim, _M_dim> result;
+    auto &result_data = result.data;
+    const auto &a_data = a.data;
+    const auto &b_data = b.data;
+    forab(i, 0, _M_dim)
     {
-        data[0][0] = x00;
-        data[0][1] = x01;
-        data[1][0] = x10;
-        data[1][1] = x11;
-    }
-    Matrix operator*(const Matrix &other)
-    {
-        Matrix prod;
-        auto &result = prod.data;
-        const auto &a = data;
-        const auto &b = other.data;
-        forab(i, 0, 6)
+        forab(j, 0, _N_dim)
         {
-            forab(j, 0, 6)
+            forab(k, 0, _mid_dim)
             {
-                forab(k, 0, 6)
-                {
-                    result[i][j] = modAdd(result[i][j],
-                                          modMult(a[i][k], b[k][j]));
-                }
+                result_data[i][j] = modAdd(result_data[i][j], modMult(a_data[i][k], b_data[k][j]));
             }
         }
-        return prod;
     }
-    friend ostream &operator<<(ostream &os, const Matrix &mat);
-};
-ostream &operator<<(ostream &os, const Matrix &mat)
-{
-    // forab(i, 0, 6)
-    // {
-    //     forab(j, 0, 6)
-    //     {
-    //         os << mat.data[i][j] << " ";
-    //     }
-    //     os << endl;
-    // }
-    os << mat.data[5][5];
-    return os;
+    return result;
 }
-Matrix mat_to_pow(Matrix mat, int b)
+template <size_t _N_dim>
+Matrix<_N_dim, _N_dim> get_identity_matrix()
+{
+    Matrix identity = Matrix<_N_dim, _N_dim>();
+    forab(i, 0, _N_dim)
+    {
+        identity.data[i][i] = 1;
+    }
+    return identity;
+}
+
+template <size_t _N_dim>
+Matrix<_N_dim, _N_dim> mat_to_pow(const Matrix<_N_dim, _N_dim> &mat, int b)
 {
     if (b == 0)
-        return Matrix(0, 1, 1, 0);
+        return get_identity_matrix<_N_dim>();
     else if (b == 1)
         return mat;
     else if (b % 2)
-        return mat * mat_to_pow(mat * mat, (b - 1) / 2);
+        return mult_mat(mat_to_pow(mult_mat(mat, mat), b / 2), mat);
     else
-        return mat_to_pow(mat * mat, b / 2);
+        return mat_to_pow(mult_mat(mat, mat), b / 2);
+}
+
+template <size_t _N_dim, size_t _M_dim>
+void show_matrix(const Matrix<_N_dim, _M_dim> &mat)
+{
+    forab(i, 0, _M_dim)
+    {
+        forab(j, 0, _N_dim)
+        {
+            cout << mat.data[j][i] << ' ';
+        }
+        PL;
+    }
+    PL;
 }
 
 void solve()
 {
     cin >> N;
-
+    if (N <= 6)
+    {
+        cout << pow(2, N - 1) << endl;
+        return;
+    }
     // O(1) space dp
     // int dp1 = 1;
     // int dp2 = 2;
@@ -189,9 +205,9 @@ void solve()
         {0, 0, 0, 0, 0, 1},
         {1, 1, 1, 1, 1, 1},
     }};
-
     Matrix base(arr);
-    cout << mat_to_pow(base, N) << endl;
+    const auto &pow_N = mat_to_pow(base, N);
+    cout << pow_N.data[5][5] << endl;
 }
 int32_t main()
 {
@@ -207,9 +223,6 @@ int32_t main()
     freopen("C:\\Users\\yadur\\Desktop\\CC\\IN.txt", "r", stdin);
     freopen("C:\\Users\\yadur\\Desktop\\CC\\OUT.txt", "w", stdout);
 #endif
-    // int T;
-    // cin >> T;
-    // while (T--)
     solve();
     return 0;
 }

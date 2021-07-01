@@ -83,98 +83,84 @@ using namespace std;
 // clang-format on
 /* TEMPLATE END */
 #pragma endregion
-int N, x, y, Q, M, K;
-
+int N, x, y, Q;
+const int NMAX = 5e3 + 5;
+array<int, NMAX> memoized;
 const int MOD = 1e9 + 7;
 const int MOD_INV_2 = 5e8 + 4;
 int modAdd(int a, int b) { return ((a % MOD + b % MOD) % MOD + MOD) % MOD; }
 int modMult(int a, int b) { return (((a % MOD) * (b % MOD)) % MOD + MOD) % MOD; }
-
-template <size_t _N_dim, size_t _M_dim>
-struct Matrix
+struct Trie
 {
-    array<array<int, _N_dim>, _M_dim> data = {};
-    Matrix()
+    unordered_map<char, Trie *> mp;
+    bool end = false;
+    void add_word(const string &word)
     {
-        forab(i, 0, _N_dim) forab(j, 0, _M_dim) data[i][j] = 0;
+        Trie *curr = this;
+        forab(i, 0, word.size())
+        {
+            if (curr->get_child_at_char(word[i]) == NULL)
+                curr->mp[word[i]] = new Trie();
+            curr = curr->mp[word[i]];
+        }
+        curr->end = true;
     }
-    Matrix(int x)
+    Trie *get_child_at_char(char c)
     {
-        forab(i, 0, _N_dim) forab(j, 0, _M_dim) data[i][j] = x;
-    }
-    Matrix(const array<array<int, _N_dim>, _M_dim> _data)
-    {
-        data = _data;
+        if (mp.count(c))
+            return mp[c];
+        else
+            return NULL;
     }
 };
-template <size_t _N_dim, size_t _mid_dim, size_t _M_dim>
-Matrix<_N_dim, _M_dim> mult_mat(const Matrix<_N_dim, _mid_dim> &a, const Matrix<_mid_dim, _M_dim> &b)
+vector<int> all_possible_prefixes(int start_idx, const string_view &str, Trie *root)
 {
-    Matrix<_N_dim, _M_dim> result;
-    auto &result_data = result.data;
-    const auto &a_data = a.data;
-    const auto &b_data = b.data;
-    forab(i, 0, _M_dim)
+    vector<int> prefixes;
+    vector<int> vec;
+    Trie *curr_node = root->get_child_at_char(str[start_idx]);
+    int curr_index = start_idx + 1;
+    while (curr_node)
     {
-        forab(j, 0, _N_dim)
-        {
-            forab(k, 0, _mid_dim)
-            {
-                result_data[i][j] = modAdd(result_data[i][j], modMult(a_data[i][k], b_data[k][j]));
-            }
-        }
+        if (curr_node->end)
+            vec.push_back(curr_index);
+
+        if (curr_index < str.size())
+            curr_node = curr_node->get_child_at_char(str[curr_index++]);
+        else
+            break;
     }
-    return result;
-}
-template <size_t _N_dim>
-Matrix<_N_dim, _N_dim> get_identity_matrix()
-{
-    Matrix identity = Matrix<_N_dim, _N_dim>();
-    forab(i, 0, _N_dim)
-    {
-        identity.data[i][i] = 1;
-    }
-    return identity;
+    return vec;
 }
 
-template <size_t _N_dim>
-Matrix<_N_dim, _N_dim> mat_to_pow(const Matrix<_N_dim, _N_dim> &mat, int b)
+int recur(int idx, const string_view &str, Trie *root)
 {
-    if (b == 0)
-        return get_identity_matrix<_N_dim>();
-    else if (b == 1)
-        return mat;
-    else if (b % 2)
-        return mult_mat(mat_to_pow(mult_mat(mat, mat), b / 2), mat);
-    else
-        return mat_to_pow(mult_mat(mat, mat), b / 2);
-}
+    if (idx == str.size()) return 1;
 
-template <size_t _N_dim, size_t _M_dim>
-void show_matrix(const Matrix<_N_dim, _M_dim> &mat)
-{
-    forab(i, 0, _M_dim)
-    {
-        forab(j, 0, _N_dim)
-        {
-            cout << mat.data[j][i] << ' ';
-        }
-        PL;
-    }
-    PL;
-}
+    int &memoized_ans = memoized[idx];
+    if (memoized_ans != -1) return memoized_ans;
 
+    int ans = 0;
+    for (const int next : all_possible_prefixes(idx, str, root))
+        ans = modAdd(ans, recur(next, str, root));
+
+    return memoized_ans = ans;
+}
 void solve()
 {
-    cin >> N >> M >> K;
-    Matrix<101, 101> mat;
-    forab(i, 0, M)
+    string S;
+    cin >> S >> N;
+
+    memoized.fill(-1);
+    Trie *root = new Trie();
+
+    forab(i, 0, N)
     {
-        cin >> x >> y;
-        mat.data[x][y]++;
+        string word;
+        cin >> word;
+        root->add_word(word);
     }
-    const auto &result = mat_to_pow(mat, K);
-    cout << result.data[1][N] << endl;
+
+    cout << recur(0, S, root);
 }
 int32_t main()
 {
@@ -190,6 +176,9 @@ int32_t main()
     freopen("C:\\Users\\yadur\\Desktop\\CC\\IN.txt", "r", stdin);
     freopen("C:\\Users\\yadur\\Desktop\\CC\\OUT.txt", "w", stdout);
 #endif
+    // int T;
+    // cin >> T;
+    // while (T--)
     solve();
     return 0;
 }

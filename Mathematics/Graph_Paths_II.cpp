@@ -84,51 +84,99 @@ using namespace std;
 /* TEMPLATE END */
 #pragma endregion
 const int NOT_POSSIBLE = -1;
-vector<vector<int>> mult_mat(const vector<vector<int>> &x, const vector<vector<int>> &y)
+template <size_t _N_dim, size_t _M_dim>
+struct Matrix
 {
-    int curr_size = x.size();
-    vector<vector<int>> result(curr_size, vector<int>(curr_size, NOT_POSSIBLE));
-
-    forab(i, 0, curr_size)
+    array<array<int, _N_dim>, _M_dim> data = {};
+    Matrix()
     {
-        forab(j, 0, curr_size)
+        forab(i, 0, _N_dim) forab(j, 0, _M_dim) data[i][j] = 0;
+    }
+    Matrix(int x)
+    {
+        forab(i, 0, _N_dim) forab(j, 0, _M_dim) data[i][j] = x;
+    }
+    Matrix(const array<array<int, _N_dim>, _M_dim> _data)
+    {
+        data = _data;
+    }
+};
+template <size_t _N_dim, size_t _mid_dim, size_t _M_dim>
+Matrix<_N_dim, _M_dim> mult_mat(const Matrix<_N_dim, _mid_dim> &a, const Matrix<_mid_dim, _M_dim> &b)
+{
+    Matrix<_N_dim, _M_dim> result(NOT_POSSIBLE);
+    auto &result_data = result.data;
+    const auto &a_data = a.data;
+    const auto &b_data = b.data;
+    forab(i, 0, _M_dim)
+    {
+        forab(j, 0, _N_dim)
         {
-            forab(k, 0, curr_size) // move from i -> j going through k
+            forab(k, 0, _mid_dim) // move from i ->j through k
             {
-                if (x[i][k] == NOT_POSSIBLE || y[k][j] == NOT_POSSIBLE) continue;
-                if (result[i][j] == NOT_POSSIBLE)
-                    result[i][j] = x[i][k] + y[k][j];
+                if (a_data[i][k] == NOT_POSSIBLE || b_data[k][j] == NOT_POSSIBLE) continue;
+                if (result_data[i][j] == NOT_POSSIBLE)
+                    result_data[i][j] = a_data[i][k] + b_data[k][j];
                 else
-                    result[i][j] = min(result[i][j], x[i][k] + y[k][j]);
+                    result_data[i][j] = min(result_data[i][j], a_data[i][k] + b_data[k][j]);
             }
         }
     }
     return result;
 }
-vector<vector<int>> mat_to_pow(const vector<vector<int>> &x, int pow)
+template <size_t _N_dim>
+Matrix<_N_dim, _N_dim> get_identity_matrix()
 {
-    if (pow == 1)
-        return x;
-    if (pow % 2 == 0)
-        return mat_to_pow(mult_mat(x, x), pow / 2);
-    else
-        return mult_mat(mat_to_pow(mult_mat(x, x), (pow - 1) / 2), x);
+    Matrix identity = Matrix<_N_dim, _N_dim>();
+    forab(i, 0, _N_dim)
+    {
+        identity.data[i][i] = 1;
+    }
+    return identity;
 }
+
+template <size_t _N_dim>
+Matrix<_N_dim, _N_dim> mat_to_pow(const Matrix<_N_dim, _N_dim> &mat, int b)
+{
+    if (b == 0)
+        return get_identity_matrix<_N_dim>();
+    else if (b == 1)
+        return mat;
+    else if (b % 2)
+        return mult_mat(mat_to_pow(mult_mat(mat, mat), b / 2), mat);
+    else
+        return mat_to_pow(mult_mat(mat, mat), b / 2);
+}
+
+template <size_t _N_dim, size_t _M_dim>
+void show_matrix(const Matrix<_N_dim, _M_dim> &mat)
+{
+    forab(i, 0, _M_dim)
+    {
+        forab(j, 0, _N_dim)
+        {
+            cout << mat.data[j][i] << ' ';
+        }
+        PL;
+    }
+    PL;
+}
+
 void solve()
 {
     int x, y, w, Q, M, K, N;
     cin >> N >> M >> K;
-    vector<vector<int>> grid(N + 1, vector<int>(N + 1, NOT_POSSIBLE));
+    Matrix<101, 101> mat(NOT_POSSIBLE);
     forab(i, 0, M)
     {
         cin >> x >> y >> w;
-        if (grid[x][y] == NOT_POSSIBLE)
-            grid[x][y] = w;
+        if (mat.data[x][y] == NOT_POSSIBLE)
+            mat.data[x][y] = w;
         else
-            grid[x][y] = min(grid[x][y], w);
+            mat.data[x][y] = min(mat.data[x][y], w);
     }
-    const auto &result = mat_to_pow(grid, K);
-    cout << result[1][N] << endl;
+    const auto &result = mat_to_pow(mat, K);
+    cout << result.data[1][N] << endl;
 }
 int32_t main()
 {

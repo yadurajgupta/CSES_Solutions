@@ -89,60 +89,78 @@ const int MOD = 1e9 + 7;
 const int MOD_INV_2 = 5e8 + 4;
 int modAdd(int a, int b) { return ((a % MOD + b % MOD) % MOD + MOD) % MOD; }
 int modMult(int a, int b) { return (((a % MOD) * (b % MOD)) % MOD + MOD) % MOD; }
+template <size_t _N_dim, size_t _M_dim>
 struct Matrix
 {
-    array<array<int, 2>, 2> data = {};
-
-    Matrix() = default;
-    Matrix(const array<array<int, 2>, 2> _data)
+    array<array<int, _N_dim>, _M_dim> data = {};
+    Matrix()
+    {
+        forab(i, 0, _N_dim) forab(j, 0, _M_dim) data[i][j] = 0;
+    }
+    Matrix(int x)
+    {
+        forab(i, 0, _N_dim) forab(j, 0, _M_dim) data[i][j] = x;
+    }
+    Matrix(const array<array<int, _N_dim>, _M_dim> _data)
     {
         data = _data;
     }
-    Matrix operator*(const Matrix &other)
+};
+template <size_t _N_dim, size_t _mid_dim, size_t _M_dim>
+Matrix<_N_dim, _M_dim> mult_mat(const Matrix<_N_dim, _mid_dim> &a, const Matrix<_mid_dim, _M_dim> &b)
+{
+    Matrix<_N_dim, _M_dim> result;
+    auto &result_data = result.data;
+    const auto &a_data = a.data;
+    const auto &b_data = b.data;
+    forab(i, 0, _M_dim)
     {
-        Matrix prod;
-        auto &result = prod.data;
-        const auto &a = data;
-        const auto &b = other.data;
-        forab(i, 0, 2)
+        forab(j, 0, _N_dim)
         {
-            forab(j, 0, 2)
+            forab(k, 0, _mid_dim)
             {
-                forab(k, 0, 2)
-                {
-                    result[i][j] = modAdd(result[i][j],
-                                          modMult(a[i][k], b[k][j]));
-                }
+                result_data[i][j] = modAdd(result_data[i][j], modMult(a_data[i][k], b_data[k][j]));
             }
         }
-        return prod;
     }
-    friend ostream &operator<<(ostream &os, const Matrix &mat);
-};
-ostream &operator<<(ostream &os, const Matrix &mat)
-{
-    // forab(i, 0, 2)
-    // {
-    //     forab(j, 0, 2)
-    //     {
-    //         os << mat.data[i][j] << " ";
-    //     }
-    //     os << endl;
-    // }
-    cout << mat.data[1][0] << " ";
-    return os;
+    return result;
 }
-Matrix mat_to_pow(Matrix mat, int b)
+template <size_t _N_dim>
+Matrix<_N_dim, _N_dim> get_identity_matrix()
+{
+    Matrix identity = Matrix<_N_dim, _N_dim>();
+    forab(i, 0, _N_dim)
+    {
+        identity.data[i][i] = 1;
+    }
+    return identity;
+}
+
+template <size_t _N_dim>
+Matrix<_N_dim, _N_dim> mat_to_pow(const Matrix<_N_dim, _N_dim> &mat, int b)
 {
     if (b == 0)
-        return Matrix({{{0, 1},
-                        {1, 0}}});
+        return get_identity_matrix<_N_dim>();
     else if (b == 1)
         return mat;
     else if (b % 2)
-        return mat * mat_to_pow(mat * mat, (b - 1) / 2);
+        return mult_mat(mat_to_pow(mult_mat(mat, mat), b / 2), mat);
     else
-        return mat_to_pow(mat * mat, b / 2);
+        return mat_to_pow(mult_mat(mat, mat), b / 2);
+}
+
+template <size_t _N_dim, size_t _M_dim>
+void show_matrix(const Matrix<_N_dim, _M_dim> &mat)
+{
+    forab(i, 0, _M_dim)
+    {
+        forab(j, 0, _N_dim)
+        {
+            cout << mat.data[j][i] << ' ';
+        }
+        PL;
+    }
+    PL;
 }
 
 void solve()
@@ -153,9 +171,10 @@ void solve()
         cout << 0 << endl;
         return;
     }
-    Matrix base({{{0, 1},
-                  {1, 1}}});
-    cout << mat_to_pow(base, N) << endl;
+    array<array<int, 2>, 2> arr{{{0, 1}, {1, 1}}};
+    Matrix base(arr);
+    const auto &pow_N = mat_to_pow(base, N - 1);
+    cout << pow_N.data[1][1] << endl;
 }
 int32_t main()
 {
