@@ -2,3 +2,7 @@
 *.vscode
 *.cph
 *.exe
+*.exp
+*.out
+*.lib
+*.pdb
