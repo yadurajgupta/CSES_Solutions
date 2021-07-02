@@ -1,8 +1,8 @@
 // replace slashes then double qutotes then stringify
 
 #include <bits/stdc++.h>
-//#include <ext/pb_ds/assoc_container.hpp>
-//#include <ext/pb_ds/tree_policy.hpp>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
 #include <iostream>
 using namespace std;
 
@@ -10,7 +10,7 @@ using namespace std;
 #pragma region
 // clang-format off
 #define int long long
-//#define ordered_set(type) __gnu_pbds::tree<type, __gnu_pbds::null_type, less<type>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>
+#define ordered_set(type) __gnu_pbds::tree<type, __gnu_pbds::null_type, less<type>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>
 #define forab(ii, aa, bb) for (int ii = aa; ii < bb; ii++)
 #define forabd(ii, aa, bb) for (int ii = aa; ii >= bb; ii--)
 #define forabi(ii, aa, bb, inc) for (int ii = aa; ii < bb; ii += inc)
