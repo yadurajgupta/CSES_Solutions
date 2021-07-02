@@ -6,9 +6,9 @@ using namespace std;
 
 // #define _DEBUG_CODE 1
 #ifdef _DEBUG_CODE
-#define FILEIO                                                      \
-    freopen("C:\\Users\\yadur\\Desktop\\CC\\IN.txt", "r", stdin);   \
-    freopen("C:\\Users\\yadur\\Desktop\\CC\\OUT.txt", "w", stdout); \
+#define FILEIO                                        \
+    freopen("/home/yaduraj/CC/IN.txt", "r", stdin);   \
+    freopen("/home/yaduraj/CC/OUT.txt", "w", stdout); \
     cout << "DEBUGGING" << endl;
 #define APPLY_NOT_IN_GDB cout << "!tup";
 #endif

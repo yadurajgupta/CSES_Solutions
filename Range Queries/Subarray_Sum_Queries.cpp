@@ -168,8 +168,8 @@ int32_t main()
     cout.tie(0);
 #endif
 #ifdef _DEBUG_CODE
-    freopen("C:\\Users\\yadur\\Desktop\\CC\\IN.txt", "r", stdin);
-    freopen("C:\\Users\\yadur\\Desktop\\CC\\OUT.txt", "w", stdout);
+    freopen("/home/yaduraj/CC/IN.txt", "r", stdin);
+    freopen("/home/yaduraj/CC/OUT.txt", "w", stdout);
     cout << "DEBUGGING" << endl;
 #endif
     // int T;

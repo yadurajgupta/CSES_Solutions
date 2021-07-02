@@ -157,8 +157,8 @@ int32_t main()
 #endif
 #ifdef _DEBUG_CODE
     cout << "DEBUGGING ON" << endl;
-    freopen("C:\\Users\\yadur\\Desktop\\CC\\IN.txt", "r", stdin);
-    freopen("C:\\Users\\yadur\\Desktop\\CC\\OUT.txt", "w", stdout);
+    freopen("/home/yaduraj/CC/IN.txt", "r", stdin);
+    freopen("/home/yaduraj/CC/OUT.txt", "w", stdout);
 #endif
     // int T;
     // cin >> T;
