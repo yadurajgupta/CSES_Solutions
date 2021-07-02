@@ -1,7 +1,7 @@
-#include <iostream>
 #include <bits/stdc++.h>
-#include <ext/pb_ds/assoc_container.hpp>
-#include <ext/pb_ds/tree_policy.hpp>
+#include <iostream>
+//#include <ext/pb_ds/assoc_container.hpp>
+//#include <ext/pb_ds/tree_policy.hpp>
 
 #define IOS                  \
     ios::sync_with_stdio(0); \
@@ -11,7 +11,7 @@
 #define INT_MAX LLONG_MAX
 #define endl '\n'
 #define int long long
-#define ordered_set(type) __gnu_pbds::tree<type, __gnu_pbds::null_type, less<type>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>
+//#define ordered_set(type) __gnu_pbds::tree<type, __gnu_pbds::null_type, less<type>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>
 #define forab(ii, aa, bb) for (int ii = aa; ii < bb; ii++)
 #define forabd(ii, aa, bb) for (int ii = aa; ii >= bb; ii--)
 #define forabi(ii, aa, bb, inc) for (int ii = aa; ii < bb; ii += inc)
@@ -39,12 +39,12 @@
         cin >> ii;
 
 using namespace std;
-int N,M,x;
+int N, M, x;
 void solve()
 {
-    cin >> N>> M;
+    cin >> N >> M;
     multiset<int> lengths{N};
-    set< int> lights{0,N};
+    set<int> lights{0, N};
     forab(i, 0, M)
     {
         cin >> x;
@@ -64,6 +64,6 @@ int32_t main()
     // int T;
     // cin >> T;
     // while (T--)
-        solve();
+    solve();
     return 0;
 }

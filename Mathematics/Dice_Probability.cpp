@@ -25,7 +25,7 @@ using namespace std;
 #define printn(vv, NN) forab(ii, 0, NN) _debug_p(vv[ii]), cout << ' '; PL;
 
 #ifndef ONLINE_JUDGE
-    #define PNAV(x) cout << #x << ' '; _debug_p(x); cout << ' ';
+    #define PNAV(x) /*cout << #x << ' '; */_debug_p(x); cout << ' ';
     #define debug(x1) PNAV(x1) cout << endl;
     #define debug2(x1, x2) PNAV(x1); debug(x2);
     #define debug3(x1, x2, x3) PNAV(x1); debug2(x2, x3);
@@ -83,51 +83,34 @@ using namespace std;
 // clang-format on
 /* TEMPLATE END */
 #pragma endregion
-int N, x, y, Q;
-const int NMAX = 1e6 + 5;
-array<bool, NMAX> previous_possible;
-array<bool, NMAX> curr_possible;
-array<int, NMAX> coins;
-
+int N, x, y, Q, a, b;
+array<array<double, 607>, 101> dp{0};
 void solve()
 {
-    cin >> N;
-    forab(i, 1, N + 1) { cin >> coins[i]; }
-    int mx_sum = accumulate(all(coins), 0LL);
-    previous_possible[0] = true;
-    forab(coin_idx, 1, N + 1)
+    cin >> N >> a >> b;
+
+    dp[0][0] = 1.0;
+
+    forab(number_of_throws, 1, N + 1)
     {
-        const int &coin = coins[coin_idx];
-        debug(coin);
-        forab(curr_sum, 0, mx_sum + 1)
+        const int &curr_min_sum = number_of_throws;
+        const int &curr_max_sum = number_of_throws * 6;
+        forab(sum, curr_min_sum, curr_max_sum + 1LL)
         {
-            if (previous_possible[curr_sum] && !curr_possible[curr_sum + coin])
+            forab(jump_from, max(0LL, sum - 6), sum)
             {
-                debug2(curr_sum, curr_sum + coin);
-                curr_possible[curr_sum + coin] = true;
+                dp[number_of_throws][sum] += (dp[number_of_throws - 1][jump_from] * (1.0 / 6));
             }
         }
-        forab(curr_sum, 0, mx_sum + 1)
-        {
-            previous_possible[curr_sum] = previous_possible[curr_sum] || curr_possible[curr_sum];
-        }
     }
-    int ans = 0;
-    forab(i, 1, mx_sum + 1)
+
+    double ans = 0.0;
+    forab(i, a, b + 1)
     {
-        if (curr_possible[i])
-        {
-            ans++;
-        }
+        ans += dp[N][i];
     }
+    cout << setprecision(6) << fixed;
     cout << ans << endl;
-    forab(i, 1, mx_sum + 1)
-    {
-        if (curr_possible[i])
-        {
-            cout << i << " ";
-        }
-    }
 }
 int32_t main()
 {

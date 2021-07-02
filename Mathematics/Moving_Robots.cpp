@@ -1,5 +1,4 @@
 // replace slashes then double qutotes then stringify
-
 #include <bits/stdc++.h>
 //#include <ext/pb_ds/assoc_container.hpp>
 //#include <ext/pb_ds/tree_policy.hpp>
@@ -16,6 +15,7 @@ using namespace std;
 #define forabd(ii, aa, bb) for (int ii = aa; ii >= bb; ii--)
 #define forabi(ii, aa, bb, inc) for (int ii = aa; ii < bb; ii += inc)
 #define forabdi(ii, aa, bb, inc) for (int ii = aa; ii >= bb; ii -= inc)
+#define between(mn,val,mx) mn<=val && val <=mx
 #define all(aa) aa.begin(), aa.end()
 #define rall(aa) aa.rbegin(), aa.rend()
 #define PL cout << endl
@@ -25,7 +25,7 @@ using namespace std;
 #define printn(vv, NN) forab(ii, 0, NN) _debug_p(vv[ii]), cout << ' '; PL;
 
 #ifndef ONLINE_JUDGE
-    #define PNAV(x) cout << #x << ' '; _debug_p(x); cout << ' ';
+    #define PNAV(x) /*cout << #x << ' ';*/ _debug_p(x); cout << ' ';
     #define debug(x1) PNAV(x1) cout << endl;
     #define debug2(x1, x2) PNAV(x1); debug(x2);
     #define debug3(x1, x2, x3) PNAV(x1); debug2(x2, x3);
@@ -83,54 +83,95 @@ using namespace std;
 // clang-format on
 /* TEMPLATE END */
 #pragma endregion
-int N, x, y, Q;
-const int NMAX = 1e6 + 5;
-array<bool, NMAX> previous_possible;
-array<bool, NMAX> curr_possible;
-array<int, NMAX> coins;
+int N, Q;
+const int NMAX = 2e5 + 5;
+const int BOARD_SIZE = 8;
+array<array<double, BOARD_SIZE + 1>, BOARD_SIZE + 1> board_empty_prob_curr;
+array<array<double, BOARD_SIZE + 1>, BOARD_SIZE + 1> board_empty_prob_next;
 
+array<array<vector<pair<int, int>>, BOARD_SIZE + 1>, BOARD_SIZE + 1> memoized_neighbour;
+array<array<int, BOARD_SIZE + 1>, BOARD_SIZE + 1> memoized_neighbour_num;
+
+array<array<int, 2>, 4> dxy{{{0, 1}, {0, -1}, {1, 0}, {-1, 0}}};
+
+vector<pair<int, int>> get_neighbours(const int &x, const int &y)
+{
+    if (memoized_neighbour_num[x][y] == -1)
+    {
+        auto &neighbours = memoized_neighbour[x][y];
+        for (const auto &[dx, dy] : dxy)
+        {
+            if (between(1, x + dx, BOARD_SIZE) && between(1, y + dy, BOARD_SIZE))
+                neighbours.push_back({x + dx, y + dy});
+        }
+        memoized_neighbour_num[x][y] = neighbours.size();
+        // debug3(x, y, memoized_neighbour[x][y]);
+    }
+    return memoized_neighbour[x][y];
+}
+double get_num_neighbours(const int &x, const int &y)
+{
+    if (memoized_neighbour_num[x][y] == -1)
+        get_neighbours(x, y);
+    return (double)memoized_neighbour_num[x][y];
+}
 void solve()
 {
     cin >> N;
-    forab(i, 1, N + 1) { cin >> coins[i]; }
-    int mx_sum = accumulate(all(coins), 0LL);
-    previous_possible[0] = true;
-    forab(coin_idx, 1, N + 1)
+
+    forab(x, 1, 9)
     {
-        const int &coin = coins[coin_idx];
-        debug(coin);
-        forab(curr_sum, 0, mx_sum + 1)
+        forab(y, 1, 9)
         {
-            if (previous_possible[curr_sum] && !curr_possible[curr_sum + coin])
+            get_neighbours(x, y);
+        }
+    }
+
+    forab(steps, 1, N + 1)
+    {
+        forab(x, 1, 9)
+        {
+            forab(y, 1, 9)
             {
-                debug2(curr_sum, curr_sum + coin);
-                curr_possible[curr_sum + coin] = true;
+                board_empty_prob_next[x][y] = 1.0;
+                for (const auto &[nx, ny] : get_neighbours(x, y))
+                {
+                    const double &number_of_possible_moves_for_neighbour = get_num_neighbours(nx, ny);
+                    const double &prob_neighbour_does_not_move_to_curr_cell = (number_of_possible_moves_for_neighbour - 1.0) / (number_of_possible_moves_for_neighbour);
+                    const double &prob_that_neighbour_is_filled = 1.0 - board_empty_prob_curr[nx][ny];
+                    board_empty_prob_next[x][y] *= (prob_that_neighbour_is_filled * prob_neighbour_does_not_move_to_curr_cell);
+                }
             }
         }
-        forab(curr_sum, 0, mx_sum + 1)
+        forab(x, 1, 9)
         {
-            previous_possible[curr_sum] = previous_possible[curr_sum] || curr_possible[curr_sum];
+            forab(y, 1, 9)
+            {
+                board_empty_prob_curr[x][y] = board_empty_prob_next[x][y];
+            }
         }
     }
-    int ans = 0;
-    forab(i, 1, mx_sum + 1)
+    double ans = 0;
+    forab(x, 1, 9)
     {
-        if (curr_possible[i])
+        forab(y, 1, 9)
         {
-            ans++;
+            ans += board_empty_prob_curr[x][y];
         }
     }
+    cout << setprecision(6) << fixed;
     cout << ans << endl;
-    forab(i, 1, mx_sum + 1)
-    {
-        if (curr_possible[i])
-        {
-            cout << i << " ";
-        }
-    }
 }
 int32_t main()
 {
+    for (auto &row : memoized_neighbour_num)
+        row.fill(-1);
+
+    for (auto &row : board_empty_prob_curr)
+        row.fill(0.0);
+
+    for (auto &row : board_empty_prob_next)
+        row.fill(1.0);
 
 #ifdef ONLINE_JUDGE
     ios::sync_with_stdio(0);
