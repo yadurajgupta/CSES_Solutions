@@ -84,6 +84,7 @@ using namespace std;
 /* TEMPLATE END */
 #pragma endregion
 const int NOT_POSSIBLE = -1;
+
 template <size_t _N_dim, size_t _M_dim>
 struct Matrix
 {
@@ -100,25 +101,31 @@ struct Matrix
     {
         data = _data;
     }
+    int &operator()(const size_t i, const size_t j)
+    {
+        return data[i][j];
+    }
+    int operator()(const size_t i, const size_t j) const
+    {
+        return data[i][j];
+    }
 };
 template <size_t _N_dim, size_t _mid_dim, size_t _M_dim>
 Matrix<_N_dim, _M_dim> mult_mat(const Matrix<_N_dim, _mid_dim> &a, const Matrix<_mid_dim, _M_dim> &b)
 {
     Matrix<_N_dim, _M_dim> result(NOT_POSSIBLE);
-    auto &result_data = result.data;
-    const auto &a_data = a.data;
-    const auto &b_data = b.data;
     forab(i, 0, _M_dim)
     {
         forab(j, 0, _N_dim)
         {
             forab(k, 0, _mid_dim) // move from i ->j through k
             {
-                if (a_data[i][k] == NOT_POSSIBLE || b_data[k][j] == NOT_POSSIBLE) continue;
-                if (result_data[i][j] == NOT_POSSIBLE)
-                    result_data[i][j] = a_data[i][k] + b_data[k][j];
+                if (a(i, k) == NOT_POSSIBLE || b(k, j) == NOT_POSSIBLE)
+                    continue;
+                if (result(i, j) == NOT_POSSIBLE)
+                    result(i, j) = a(i, k) + b(k, j);
                 else
-                    result_data[i][j] = min(result_data[i][j], a_data[i][k] + b_data[k][j]);
+                    result(i, j) = min(result(i, j), a(i, k) + b(k, j));
             }
         }
     }
@@ -130,7 +137,7 @@ Matrix<_N_dim, _N_dim> get_identity_matrix()
     Matrix identity = Matrix<_N_dim, _N_dim>();
     forab(i, 0, _N_dim)
     {
-        identity.data[i][i] = 1;
+        identity(i, i) = 1;
     }
     return identity;
 }
@@ -155,7 +162,7 @@ void show_matrix(const Matrix<_N_dim, _M_dim> &mat)
     {
         forab(j, 0, _N_dim)
         {
-            cout << mat.data[j][i] << ' ';
+            cout << mat(j, i) << ' ';
         }
         PL;
     }
@@ -170,13 +177,13 @@ void solve()
     forab(i, 0, M)
     {
         cin >> x >> y >> w;
-        if (mat.data[x][y] == NOT_POSSIBLE)
-            mat.data[x][y] = w;
+        if (mat(x, y) == NOT_POSSIBLE)
+            mat(x, y) = w;
         else
-            mat.data[x][y] = min(mat.data[x][y], w);
+            mat(x, y) = min(mat(x, y), w);
     }
     const auto &result = mat_to_pow(mat, K);
-    cout << result.data[1][N] << endl;
+    cout << result(1, N) << endl;
 }
 int32_t main()
 {

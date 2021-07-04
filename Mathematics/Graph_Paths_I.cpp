@@ -106,21 +106,27 @@ struct Matrix
     {
         data = _data;
     }
+    int &operator()(const size_t i, const size_t j)
+    {
+        return data[i][j];
+    }
+    int operator()(const size_t i, const size_t j) const
+    {
+        return data[i][j];
+    }
 };
 template <size_t _N_dim, size_t _mid_dim, size_t _M_dim>
 Matrix<_N_dim, _M_dim> mult_mat(const Matrix<_N_dim, _mid_dim> &a, const Matrix<_mid_dim, _M_dim> &b)
 {
     Matrix<_N_dim, _M_dim> result;
-    auto &result_data = result.data;
-    const auto &a_data = a.data;
-    const auto &b_data = b.data;
+
     forab(i, 0, _M_dim)
     {
         forab(j, 0, _N_dim)
         {
             forab(k, 0, _mid_dim)
             {
-                result_data[i][j] = modAdd(result_data[i][j], modMult(a_data[i][k], b_data[k][j]));
+                result(i, j) = modAdd(result(i, j), modMult(a(i, k), b(k, j)));
             }
         }
     }
@@ -132,7 +138,7 @@ Matrix<_N_dim, _N_dim> get_identity_matrix()
     Matrix identity = Matrix<_N_dim, _N_dim>();
     forab(i, 0, _N_dim)
     {
-        identity.data[i][i] = 1;
+        identity(i, i) = 1;
     }
     return identity;
 }
@@ -157,7 +163,7 @@ void show_matrix(const Matrix<_N_dim, _M_dim> &mat)
     {
         forab(j, 0, _N_dim)
         {
-            cout << mat.data[j][i] << ' ';
+            cout << mat(j, i) << ' ';
         }
         PL;
     }
@@ -171,10 +177,10 @@ void solve()
     forab(i, 0, M)
     {
         cin >> x >> y;
-        mat.data[x][y]++;
+        mat(x, y)++;
     }
     const auto &result = mat_to_pow(mat, K);
-    cout << result.data[1][N] << endl;
+    cout << result(1, N) << endl;
 }
 int32_t main()
 {
