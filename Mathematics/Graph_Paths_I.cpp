@@ -94,13 +94,15 @@ template <size_t _N_dim, size_t _M_dim>
 struct Matrix
 {
     array<array<int, _N_dim>, _M_dim> data = {};
+    int valid_N_dim = _N_dim;
+    int valid_M_dim = _M_dim;
     Matrix()
     {
-        forab(i, 0, _N_dim) forab(j, 0, _M_dim) data[i][j] = 0;
+        forab(i, 0, valid_N_dim) forab(j, 0, valid_M_dim) data[i][j] = 0;
     }
     Matrix(int x)
     {
-        forab(i, 0, _N_dim) forab(j, 0, _M_dim) data[i][j] = x;
+        forab(i, 0, valid_N_dim) forab(j, 0, valid_M_dim) data[i][j] = x;
     }
     Matrix(const array<array<int, _N_dim>, _M_dim> _data)
     {
@@ -114,17 +116,26 @@ struct Matrix
     {
         return data[i][j];
     }
+    void set_dim(const int &new_N_dim, const int &new_M_dim)
+    {
+        valid_N_dim = new_N_dim;
+        valid_M_dim = new_M_dim;
+    }
 };
+
 template <size_t _N_dim, size_t _mid_dim, size_t _M_dim>
 Matrix<_N_dim, _M_dim> mult_mat(const Matrix<_N_dim, _mid_dim> &a, const Matrix<_mid_dim, _M_dim> &b)
 {
+    const int &valid_N_dim = a.valid_N_dim;
+    const int &valid_M_dim = b.valid_M_dim;
+    const int &valid_mid_mid = a.valid_M_dim;
     Matrix<_N_dim, _M_dim> result;
-
-    forab(i, 0, _M_dim)
+    result.set_dim(valid_N_dim, valid_M_dim);
+    forab(i, 0, valid_M_dim)
     {
-        forab(j, 0, _N_dim)
+        forab(j, 0, valid_N_dim)
         {
-            forab(k, 0, _mid_dim)
+            forab(k, 0, valid_mid_mid)
             {
                 result(i, j) = modAdd(result(i, j), modMult(a(i, k), b(k, j)));
             }
@@ -132,11 +143,13 @@ Matrix<_N_dim, _M_dim> mult_mat(const Matrix<_N_dim, _mid_dim> &a, const Matrix<
     }
     return result;
 }
+
 template <size_t _N_dim>
-Matrix<_N_dim, _N_dim> get_identity_matrix()
+Matrix<_N_dim, _N_dim> get_identity_matrix(const int &valid_N_dim = _N_dim)
 {
     Matrix identity = Matrix<_N_dim, _N_dim>();
-    forab(i, 0, _N_dim)
+    identity.set_dim(valid_N_dim, valid_N_dim);
+    forab(i, 0, valid_N_dim)
     {
         identity(i, i) = 1;
     }
@@ -147,7 +160,7 @@ template <size_t _N_dim>
 Matrix<_N_dim, _N_dim> mat_to_pow(const Matrix<_N_dim, _N_dim> &mat, int b)
 {
     if (b == 0)
-        return get_identity_matrix<_N_dim>();
+        return get_identity_matrix<_N_dim>(mat.valid_N_dim);
     else if (b == 1)
         return mat;
     else if (b % 2)
@@ -159,9 +172,11 @@ Matrix<_N_dim, _N_dim> mat_to_pow(const Matrix<_N_dim, _N_dim> &mat, int b)
 template <size_t _N_dim, size_t _M_dim>
 void show_matrix(const Matrix<_N_dim, _M_dim> &mat)
 {
-    forab(i, 0, _M_dim)
+    const int &valid_N_dim = mat.valid_N_dim;
+    const int &valid_M_dim = mat.valid_M_dim;
+    forab(i, 0, valid_M_dim)
     {
-        forab(j, 0, _N_dim)
+        forab(j, 0, valid_N_dim)
         {
             cout << mat(j, i) << ' ';
         }
@@ -174,6 +189,7 @@ void solve()
 {
     cin >> N >> M >> K;
     Matrix<101, 101> mat;
+    mat.set_dim(N + 1, N + 1);
     forab(i, 0, M)
     {
         cin >> x >> y;
