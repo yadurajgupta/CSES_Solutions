@@ -93,6 +93,7 @@ struct SegmentTree
     shared_ptr<SegmentTree> lower;
     shared_ptr<SegmentTree> upper;
     bool is_leaf = false;
+    static const int INVALID_ANSWER;
 
     SegmentTree(const int _index_l,
                 const int _index_r)
@@ -145,7 +146,6 @@ struct SegmentTree
         return false;
     }
 
-    const int INVALID_ANSWER = 0; //return in place of invalid ans
     template <typename type_t>
     static shared_ptr<SegmentTree> build_segment_tree(const type_t &arr,
                                                       const int &curr_index_l,
@@ -189,6 +189,7 @@ struct SegmentTree
         return {false, INVALID_ANSWER};
     }
 };
+const int SegmentTree::INVALID_ANSWER = 0;
 
 array<int, NMAX> arr;
 

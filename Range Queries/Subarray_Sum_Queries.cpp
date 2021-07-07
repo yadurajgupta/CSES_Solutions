@@ -99,6 +99,7 @@ struct SegmentTree
     shared_ptr<SegmentTree> upper;
     shared_ptr<SegmentTree> parent;
     bool is_leaf = false;
+    static const int INVALID_ANSWER;
 
     SegmentTree(const int _index_l,
                 const int _index_r)
@@ -192,6 +193,7 @@ struct SegmentTree
         return max_subarray_sum;
     }
 };
+const int SegmentTree::INVALID_ANSWER = 0;
 
 void solve()
 {
