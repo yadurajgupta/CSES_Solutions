@@ -93,17 +93,23 @@ struct SegmentTree
     int val;
     int index_l;
     int index_r;
-    shared_ptr<SegmentTree> lower;
-    shared_ptr<SegmentTree> upper;
+    SegmentTree *lower = NULL;
+    SegmentTree *upper = NULL;
     bool is_leaf = false;
     static const int INVALID_ANSWER;
-
     SegmentTree(const int _index_l,
                 const int _index_r)
     {
         index_l = _index_l;
         index_r = _index_r;
         is_leaf = (index_l == index_r);
+    }
+    ~SegmentTree()
+    {
+        if (lower)
+            delete lower;
+        if (upper)
+            delete upper;
     }
     bool overlap(const int &other_index_l, const int &other_index_r) const
     {
@@ -120,14 +126,14 @@ struct SegmentTree
         return (index_l <= index) &&
                (index <= index_r);
     }
-    static void update_segment_tree(shared_ptr<SegmentTree> &root, const int &update_node_index, const int &update_node_new_val)
+    static void update_segment_tree(SegmentTree *&root, const int &update_node_index, const int &update_node_new_val)
     {
         if (!root)
             return;
         root->update_node(update_node_index, update_node_new_val);
         return;
     }
-    static pair<bool, int> query_segment_tree(shared_ptr<SegmentTree> &root, const int &target_l, const int &target_r)
+    static pair<bool, int> query_segment_tree(SegmentTree *&root, const int &target_l, const int &target_r)
     {
         return root->query_tree(target_l, target_r);
     }
@@ -150,11 +156,11 @@ struct SegmentTree
     }
 
     template <typename type_t>
-    static shared_ptr<SegmentTree> build_segment_tree(const type_t &arr,
-                                                      const int &curr_index_l,
-                                                      const int &curr_index_r)
+    static SegmentTree *build_segment_tree(const type_t &arr,
+                                           const int &curr_index_l,
+                                           const int &curr_index_r)
     {
-        shared_ptr<SegmentTree> node = make_shared<SegmentTree>(curr_index_l, curr_index_r);
+        SegmentTree *node = new SegmentTree(curr_index_l, curr_index_r);
         if (node->is_leaf)
         {
             node->val = arr[curr_index_l];
@@ -198,21 +204,23 @@ void solve()
 {
     cin >> N >> Q;
     forab(i, 1, N + 1) cin >> arr[i];
-    debugab(arr, 1, N);
-    shared_ptr<SegmentTree> root = SegmentTree::build_segment_tree(arr, 1, N);
-    forab(i, 0, Q)
     {
-        cin >> t >> x >> y;
-        if (t == 1)
+        SegmentTree *root = SegmentTree::build_segment_tree(arr, 1, N);
+        forab(i, 0, Q)
         {
-            SegmentTree::update_segment_tree(root, x, y);
+            cin >> t >> x >> y;
+            if (t == 1)
+            {
+                SegmentTree::update_segment_tree(root, x, y);
+            }
+            else
+            {
+                const auto &[validity, ans] = SegmentTree::query_segment_tree(root, x, y);
+                if (validity)
+                    cout << ans << endl;
+            }
         }
-        else
-        {
-            const auto &[validity, ans] = SegmentTree::query_segment_tree(root, x, y);
-            if (validity)
-                cout << ans << endl;
-        }
+        delete root;
     }
 }
 int32_t main()
