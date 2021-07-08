@@ -105,14 +105,19 @@ array<int, NMAX> node_to_index;
 int total_number_of_cycles = 0;
 int total_number_of_trees = 0;
 
-void find_cycle(int node, int par, vector<int> &path)
+void find_cycle(const int &node, vector<int> &path)
 {
-    int next = arr[node];
+    node_to_index[node] = path.size();
+    path.push_back(node);
+    vis[node] = true;
+    curr_vis[node] = true;
+
+    const int &next = arr[node];
     if (curr_vis[next]) // found a cycle
     {
-        int prev_index_of_next = node_to_index[next];
+        const int &prev_index_of_next = node_to_index[next];
         int pos = 0;
-        int sz = path.size() - prev_index_of_next;
+        const int &sz = path.size() - prev_index_of_next;
         forab(i, prev_index_of_next, path.size())
         {
             cycles_ids[path[i]] = total_number_of_cycles;
@@ -121,30 +126,21 @@ void find_cycle(int node, int par, vector<int> &path)
         }
         total_number_of_cycles++;
     }
-    else if (vis[next]) // no need to continue;
+    else if (!vis[next]) // continue dfs
     {
-        return;
+        find_cycle(next, path);
     }
-    else //continue dfs
-    {
-        node_to_index[next] = path.size();
-        path.push_back(next);
-        vis[next] = true;
-        curr_vis[next] = true;
-
-        find_cycle(next, next, path);
-
-        node_to_index[next] = -1;
-        path.pop_back();
-        curr_vis[next] = false;
-    }
+    node_to_index[node] = -1;
+    path.pop_back();
+    curr_vis[node] = false;
 }
-void find_tree(int node, int par, vector<int> &path)
+void find_tree(const int &node, vector<int> &path)
 {
-    int next = arr[node];
+    path.push_back(node);
+    const int &next = arr[node];
     if (cycles_ids[next] != -1) // found its way to a cycle
     {
-        for (int n : path)
+        for (const int &n : path)
         {
             trees_ids[n] = total_number_of_trees;
             trees_ids_to_cycle_ids[n] = cycles_ids[next];
@@ -156,7 +152,7 @@ void find_tree(int node, int par, vector<int> &path)
     }
     else if (trees_ids[next] != -1) // merge this tree into another
     {
-        for (int n : path)
+        for (const int &n : path)
         {
             trees_ids[n] = trees_ids[next];
             trees_ids_to_cycle_ids[n] = trees_ids_to_cycle_ids[next];
@@ -166,12 +162,11 @@ void find_tree(int node, int par, vector<int> &path)
     }
     else //continue dfs
     {
-        path.push_back(next);
-        find_tree(next, node, path);
-        path.pop_back();
+        find_tree(next, path);
     }
+    path.pop_back();
 }
-void set_tree_depths(int node, int par, int depth = 0)
+void set_tree_depths(const int &node, const int &par, const int &depth = 0)
 {
     rev_depth[node] = depth;
     rev_dp[node][0] = par;
@@ -183,7 +178,7 @@ void set_tree_depths(int node, int par, int depth = 0)
         }
     }
 }
-int get_cycle_dist(int x, int y)
+int get_cycle_dist(const int &x, const int &y)
 {
     const int &cycle_sz = cycles_ids_size[x];
     if (cycles_ids_pos[x] <= cycles_ids_pos[y])
@@ -191,7 +186,7 @@ int get_cycle_dist(int x, int y)
     else
         return cycle_sz - cycles_ids_pos[x] + cycles_ids_pos[y];
 }
-int jump_to_par(int node, int jumps)
+int jump_to_par(int node, const int &jumps)
 {
     debug3(node, rev_depth[node], jumps);
     if (jumps > rev_depth[node])
@@ -206,7 +201,7 @@ int jump_to_par(int node, int jumps)
     }
     return node;
 }
-int get_tree_dist(int x, int y)
+int get_tree_dist(const int &x, const int &y)
 {
     int to_jump = rev_depth[y] - rev_depth[x];
     debug3(x, y, to_jump);
@@ -226,33 +221,21 @@ void solve()
         cin >> arr[i];
         rev_adj[arr[i]].push_back(i);
     }
-
-    forab(i, 1, N + 1)
     {
-        if (!vis[i])
+        vector<int> path;
+        forab(i, 1, N + 1)
         {
-            vector<int> path;
-            node_to_index[i] = path.size();
-            path.push_back(i);
-            vis[i] = true;
-            curr_vis[i] = true;
-
-            find_cycle(i, -1, path);
-
-            node_to_index[i] = -1;
-            path.pop_back();
-            curr_vis[i] = false;
+            if (!vis[i])
+            {
+                find_cycle(i, path);
+            }
         }
-    }
-
-    forab(i, 1, N + 1)
-    {
-        if (trees_ids[i] == -1 && cycles_ids[i] == -1)
+        forab(i, 1, N + 1)
         {
-            vector<int> path;
-            path.push_back(i);
-            find_tree(i, -1, path);
-            path.pop_back();
+            if (trees_ids[i] == -1 && cycles_ids[i] == -1)
+            {
+                find_tree(i, path);
+            }
         }
     }
 
@@ -284,11 +267,11 @@ void solve()
             continue;
         }
 
-        if (x_is_cycle == false && y_is_cycle && cycles_ids[y] == trees_ids_to_cycle_ids[x])
+        if (!x_is_cycle && y_is_cycle && cycles_ids[y] == trees_ids_to_cycle_ids[x])
         {
-            int root_node_of_tree = tree_to_root_node[x];
-            int first_cycle_node = trees_ids_to_cycle_node[x];
-            int tree_dist = get_tree_dist(root_node_of_tree, x);
+            const int &root_node_of_tree = tree_to_root_node[x];
+            const int &first_cycle_node = trees_ids_to_cycle_node[x];
+            const int &tree_dist = get_tree_dist(root_node_of_tree, x);
             if (tree_dist == -1)
                 cout << -1 << endl;
             else
@@ -296,7 +279,7 @@ void solve()
             continue;
         }
 
-        if (x_is_cycle == false && y_is_cycle == false && trees_ids[x] == trees_ids[y])
+        if (!x_is_cycle && !y_is_cycle && trees_ids[x] == trees_ids[y])
         {
             cout << get_tree_dist(y, x) << endl;
             continue;
