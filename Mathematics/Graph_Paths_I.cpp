@@ -90,52 +90,52 @@ const int MOD_INV_2 = 5e8 + 4;
 int modAdd(int a, int b) { return ((a % MOD + b % MOD) % MOD + MOD) % MOD; }
 int modMult(int a, int b) { return (((a % MOD) * (b % MOD)) % MOD + MOD) % MOD; }
 
-template <size_t _N_dim, size_t _M_dim>
+template <size_t MAX_ROWS, size_t MAX_COLUMNS>
 struct Matrix
 {
-    array<array<int, _N_dim>, _M_dim> data = {};
-    int valid_N_dim = _N_dim;
-    int valid_M_dim = _M_dim;
+    array<array<int, MAX_COLUMNS>, MAX_ROWS> data;
+    int VALID_ROWS = MAX_ROWS;
+    int VALID_COLUMNS = MAX_COLUMNS;
     Matrix()
     {
-        forab(i, 0, valid_N_dim) forab(j, 0, valid_M_dim) data[i][j] = 0;
+        forab(i, 0, VALID_ROWS) forab(j, 0, VALID_COLUMNS) data[i][j] = 0;
     }
     Matrix(int x)
     {
-        forab(i, 0, valid_N_dim) forab(j, 0, valid_M_dim) data[i][j] = x;
+        forab(i, 0, VALID_ROWS) forab(j, 0, VALID_COLUMNS) data[i][j] = x;
     }
-    Matrix(const array<array<int, _N_dim>, _M_dim> _data)
+    Matrix(const array<array<int, MAX_COLUMNS>, MAX_ROWS> _data)
     {
         data = _data;
     }
     int &operator()(const size_t i, const size_t j)
     {
-        return data[i][j];
+        return data.at(i).at(j);
     }
     int operator()(const size_t i, const size_t j) const
     {
-        return data[i][j];
+        return data.at(i).at(j);
     }
-    void set_dim(const int &new_N_dim, const int &new_M_dim)
+    void set_dim(const int &NEW_VALID_ROWS, const int &NEW_VALID_COLUMNS)
     {
-        valid_N_dim = new_N_dim;
-        valid_M_dim = new_M_dim;
+        VALID_ROWS = NEW_VALID_ROWS;
+        VALID_COLUMNS = NEW_VALID_COLUMNS;
     }
 };
 
-template <size_t _N_dim, size_t _mid_dim, size_t _M_dim>
-Matrix<_N_dim, _M_dim> mult_mat(const Matrix<_N_dim, _mid_dim> &a, const Matrix<_mid_dim, _M_dim> &b)
+template <size_t MAX_ROWS, size_t MID_DIM, size_t MAX_COLUMNS>
+Matrix<MAX_ROWS, MAX_COLUMNS> multiply_matrix(const Matrix<MAX_ROWS, MID_DIM> &a, const Matrix<MID_DIM, MAX_COLUMNS> &b)
 {
-    const int &valid_N_dim = a.valid_N_dim;
-    const int &valid_M_dim = b.valid_M_dim;
-    const int &valid_mid_mid = a.valid_M_dim;
-    Matrix<_N_dim, _M_dim> result;
-    result.set_dim(valid_N_dim, valid_M_dim);
-    forab(i, 0, valid_M_dim)
+    const int &VALID_ROWS = a.VALID_ROWS;
+    const int &VALID_COLUMNS = b.VALID_COLUMNS;
+    const int &valid_mid_mid = a.VALID_COLUMNS;
+    Matrix<MAX_ROWS, MAX_COLUMNS> result;
+    result.set_dim(VALID_ROWS, VALID_COLUMNS);
+    forab(i, 0, VALID_ROWS)
     {
-        forab(j, 0, valid_N_dim)
+        forab(j, 0, VALID_COLUMNS)
         {
-            forab(k, 0, valid_mid_mid)
+            forab(k, 0, MID_DIM)
             {
                 result(i, j) = modAdd(result(i, j), modMult(a(i, k), b(k, j)));
             }
@@ -144,41 +144,41 @@ Matrix<_N_dim, _M_dim> mult_mat(const Matrix<_N_dim, _mid_dim> &a, const Matrix<
     return result;
 }
 
-template <size_t _N_dim>
-Matrix<_N_dim, _N_dim> get_identity_matrix(const int &valid_N_dim = _N_dim)
+template <size_t MAX_ROWS>
+Matrix<MAX_ROWS, MAX_ROWS> get_identity_matrix(const int &VALID_ROWS = MAX_ROWS)
 {
-    Matrix identity = Matrix<_N_dim, _N_dim>();
-    identity.set_dim(valid_N_dim, valid_N_dim);
-    forab(i, 0, valid_N_dim)
+    Matrix identity = Matrix<MAX_ROWS, MAX_ROWS>();
+    identity.set_dim(VALID_ROWS, VALID_ROWS);
+    forab(i, 0, VALID_ROWS)
     {
         identity(i, i) = 1;
     }
     return identity;
 }
 
-template <size_t _N_dim>
-Matrix<_N_dim, _N_dim> mat_to_pow(const Matrix<_N_dim, _N_dim> &mat, int b)
+template <size_t MAX_ROWS>
+Matrix<MAX_ROWS, MAX_ROWS> matrix_to_pow(const Matrix<MAX_ROWS, MAX_ROWS> &mat, int b)
 {
     if (b == 0)
-        return get_identity_matrix<_N_dim>(mat.valid_N_dim);
+        return get_identity_matrix<MAX_ROWS>(mat.VALID_ROWS);
     else if (b == 1)
         return mat;
     else if (b % 2)
-        return mult_mat(mat_to_pow(mult_mat(mat, mat), b / 2), mat);
+        return multiply_matrix(matrix_to_pow(multiply_matrix(mat, mat), b / 2), mat);
     else
-        return mat_to_pow(mult_mat(mat, mat), b / 2);
+        return matrix_to_pow(multiply_matrix(mat, mat), b / 2);
 }
 
-template <size_t _N_dim, size_t _M_dim>
-void show_matrix(const Matrix<_N_dim, _M_dim> &mat)
+template <size_t MAX_ROWS, size_t MAX_COLUMNS>
+void show_matrix(const Matrix<MAX_ROWS, MAX_COLUMNS> &mat)
 {
-    const int &valid_N_dim = mat.valid_N_dim;
-    const int &valid_M_dim = mat.valid_M_dim;
-    forab(i, 0, valid_M_dim)
+    const int &VALID_ROWS = mat.VALID_ROWS;
+    const int &VALID_COLUMNS = mat.VALID_COLUMNS;
+    forab(i, 0, VALID_ROWS)
     {
-        forab(j, 0, valid_N_dim)
+        forab(j, 0, VALID_COLUMNS)
         {
-            cout << mat(j, i) << ' ';
+            cout << mat(i, j) << ' ';
         }
         PL;
     }
@@ -195,7 +195,7 @@ void solve()
         cin >> x >> y;
         mat(x, y)++;
     }
-    const auto &result = mat_to_pow(mat, K);
+    const auto &result = matrix_to_pow(mat, K);
     cout << result(1, N) << endl;
 }
 int32_t main()
