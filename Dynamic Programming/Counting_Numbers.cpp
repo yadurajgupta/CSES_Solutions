@@ -86,137 +86,9 @@ template <class type> using oset = __gnu_pbds::tree<type, __gnu_pbds::null_type,
 int N, x, y, Q;
 const int NMAX = 2e5 + 5;
 array<int, NMAX> arr;
-
-struct SegmentTree
-{
-    int sum;
-    int max_pref;
-    int max_suffix;
-    int max_subarray_sum;
-    int index_l;
-    int index_r;
-    SegmentTree *lower = NULL;
-    SegmentTree *upper = NULL;
-    SegmentTree *parent;
-    bool is_leaf = false;
-    static const int INVALID_ANSWER;
-
-    SegmentTree(const int _index_l,
-                const int _index_r)
-    {
-        index_l = _index_l;
-        index_r = _index_r;
-        is_leaf = (index_l == index_r);
-    }
-    ~SegmentTree()
-    {
-        if (lower)
-            delete lower;
-        if (upper)
-            delete upper;
-    }
-    bool overlap(const int &other_index_l, const int &other_index_r) const
-    {
-        return (index_l <= other_index_r) &&
-               (index_r >= other_index_l);
-    }
-    bool enclosed_in(const int &other_index_l, const int &other_index_r) const
-    {
-        return (other_index_l <= index_l) &&
-               (index_r <= other_index_r);
-    }
-    bool index_lies_in_node(const int &index) const
-    {
-        return (index_l <= index) &&
-               (index <= index_r);
-    }
-    static void update_segment_tree(SegmentTree *&root, const int &update_node_index, const int &update_node_new_val)
-    {
-        if (!root)
-            return;
-        root->update_node(update_node_index, update_node_new_val);
-        return;
-    }
-    static int query_segment_tree(SegmentTree *&root)
-    {
-        return root->query_tree();
-    }
-    bool update_node(const int &update_node_index, const int &update_node_new_val)
-    {
-        if (!index_lies_in_node(update_node_index))
-            return false;
-        if (is_leaf)
-        {
-            this->sum = update_node_new_val;
-            this->max_pref = max(this->sum, 0LL);
-            this->max_suffix = max(this->sum, 0LL);
-            this->max_subarray_sum = max(this->sum, 0LL);
-            return true;
-        }
-        if (lower->update_node(update_node_index, update_node_new_val) ||
-            upper->update_node(update_node_index, update_node_new_val))
-        {
-            this->update_node_based_on_children();
-            return true;
-        }
-        return false;
-    }
-
-    static const int EMPTY_ANS = 0; //return in place of invalid ans
-    template <typename type_t>
-    static SegmentTree *build_segment_tree(const type_t &arr,
-                                           const int &curr_index_l,
-                                           const int &curr_index_r,
-                                           SegmentTree *par = NULL)
-    {
-        SegmentTree *node = new SegmentTree(curr_index_l, curr_index_r);
-        if (node->is_leaf)
-        {
-            node->sum = arr[curr_index_l];
-            node->max_pref = max(node->sum, 0LL);
-            node->max_suffix = max(node->sum, 0LL);
-            node->max_subarray_sum = max(node->sum, 0LL);
-        }
-        else
-        {
-            int curr_index_m = curr_index_l + (curr_index_r - curr_index_l) / 2;
-            node->lower = build_segment_tree(arr, curr_index_l, curr_index_m, node);
-            node->upper = build_segment_tree(arr, curr_index_m + 1, curr_index_r, node);
-            node->update_node_based_on_children();
-        }
-        return node;
-    }
-    void update_node_based_on_children()
-    {
-        if (is_leaf)
-            return;
-        this->sum = lower->sum + upper->sum;
-        this->max_pref = max({lower->max_pref, lower->sum + upper->max_pref, 0LL});
-        this->max_suffix = max({upper->max_suffix, upper->sum + lower->max_suffix, 0LL});
-        this->max_subarray_sum = max({lower->max_subarray_sum, upper->max_subarray_sum, lower->max_suffix + upper->max_pref, 0LL});
-    }
-    int query_tree() const
-    {
-        return max_subarray_sum;
-    }
-};
-const int SegmentTree::INVALID_ANSWER = 0;
-
 void solve()
 {
-    cin >> N >> Q;
-    forab(i, 1, N + 1) cin >> arr[i];
-    {
-        int index, val;
-        SegmentTree *root = SegmentTree::build_segment_tree(arr, 1, N);
-        forab(i, 0, Q)
-        {
-            cin >> index >> val;
-            SegmentTree::update_segment_tree(root, index, val);
-            cout << SegmentTree::query_segment_tree(root) << endl;
-        }
-        delete root;
-    }
+    cin >> N;
 }
 int32_t main()
 {
@@ -229,6 +101,8 @@ int32_t main()
 #ifdef _DEBUG_CODE
     cout << "DEBUGGING ON" << endl;
     cout.flush();
+    // freopen("C:/Users/yadur/Downloads/Stuff/CC/IN.txt", "r", stdin);
+    // freopen("C:/Users/yadur/Downloads/Stuff/CC/OUT.txt", "w", stdout);
     freopen("/home/yaduraj/CC/IN.txt", "r", stdin);
     freopen("/home/yaduraj/CC/OUT.txt", "w", stdout);
 #endif

@@ -10,7 +10,8 @@ using namespace std;
     cout.tie(0);
 #define endl '\n'
 #define int long long
-#define ordered_set(type) __gnu_pbds::tree<type, __gnu_pbds::null_type, less<type>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>
+template <class type>
+using oset = __gnu_pbds::tree<type, __gnu_pbds::null_type, less<type>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
 #define forab(ii, aa, bb) for (int ii = aa; ii < bb; ii++)
 #define forabd(ii, aa, bb) for (int ii = aa; ii >= bb; ii--)
 #define forabi(ii, aa, bb, inc) for (int ii = aa; ii < bb; ii += inc)
@@ -81,7 +82,7 @@ void solve()
         cout << 1 << endl;
         return;
     }
-    ordered_set(int) st;
+    oset<int> st;
     forab(i, 1, N + 1)
         st.insert(i);
     int k = K % N;

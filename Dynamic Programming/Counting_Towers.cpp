@@ -11,7 +11,7 @@ using namespace std;
 #pragma region
 // clang-format off
 #define int long long
-#define ordered_set(type) __gnu_pbds::tree<type, __gnu_pbds::null_type, less<type>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>
+template <class type> using oset = __gnu_pbds::tree<type, __gnu_pbds::null_type, less<type>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
 #define forab(ii, aa, bb) for (int ii = aa; ii < bb; ii++)
 #define forabd(ii, aa, bb) for (int ii = aa; ii >= bb; ii--)
 #define forabi(ii, aa, bb, inc) for (int ii = aa; ii < bb; ii += inc)
@@ -190,13 +190,13 @@ void solve()
 {
     cin >> N;
     // O(1) dp
-    // int x = 1; //are of width 2
-    // int y = 1; // are two of width one
+    // int x = 1; //are of width two |__|
+    // int y = 1; // are of width one |_|_|
     // int nx, ny;
     // forab(i, 2, N + 1)
     // {
-    //     // nx = 2 * x + y;
-    //     // ny = x + 4 * y;
+    //     nx = 2 * x + y;
+    //     ny = x + 4 * y;
     //     x = nx;
     //     y = ny;
     // }
